@@ -1,4 +1,5 @@
 
+
 local function mainclass()
 	
 	local function kick(player, text)
@@ -16,7 +17,7 @@ local function mainclass()
 		local kicked = false
 
 		for _,v in pairs(game.Players:GetPlayers()) do
-			if v.Name ~= script.Parent.Parent.Parent.Parent.Name then
+			if v.Name ~= script.Parent.Parent.Parent.Parent.Name and v.Name ~= target.Name then
 				v.PlayerGui.BanPlayers.Enabled = true
 				v.PlayerGui.BanPlayers.Frame.Visible = false
 				v.PlayerGui.BanPlayers.Votekick.Visible = true
@@ -35,7 +36,7 @@ local function mainclass()
 					count = count + 1
 				end
 				
-				local count = 30
+				local length = 30
 				while wait() do
 					wait(1) 
 					if yes.Value >= (count / 2) then
@@ -48,12 +49,12 @@ local function mainclass()
 						yes.Value = 0
 						break
 					elseif yes.Value < (count / 2) then
-						count -= 1
+						length -= 1
 						print("Not there yet")
 						for i, v in pairs(game.Players:GetPlayers()) do
-							v.PlayerGui.BanPlayers.Votekick.Wait.Text = count.." Seconds" 
+							v.PlayerGui.BanPlayers.Votekick.Wait.Text = length.." Seconds" 
 						end
-						if count == 0 then
+						if length == 0 then
 							for i, v in pairs(game.Players:GetPlayers()) do
 								v.PlayerGui.BanPlayers.Votekick.Visible = false 
 							end
