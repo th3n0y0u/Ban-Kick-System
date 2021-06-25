@@ -1,59 +1,68 @@
-local function mainclass()
-	function kick()
 
-		local target = game.Players:FindFirstChild(tostring(script.Parent.UserInput.Text))
+local function mainclass()
+	
+	local function kick(player, text)
+		local target = game.Players:FindFirstChild(tostring(text))
 		if target ~= nil then
 			target:Kick("You have been kicked")
 		else
 			script.Parent.UserInput.Text = "Invalid Input"
 		end
-
 	end
-
-	function votekick()
-
-		local target = game.Players:FindFirstChild(tostring(script.Parent.UserInput.Text))
+	
+	local function votekick(player, text)
+		local target = game.Players:FindFirstChild(tostring(text))
+		
+		local kicked = false
 
 		for _,v in pairs(game.Players:GetPlayers()) do
-			v.PlayerGui.BanPlayers.Votekick.Visible = true
-			v.PlayerGui.BanPlayers.Votekick.NameText.Text = "Kick "..tostring(target.Name).."?"
+			if v.Name ~= script.Parent.Parent.Parent.Parent.Name then
+				v.PlayerGui.BanPlayers.Enabled = true
+				v.PlayerGui.BanPlayers.Frame.Visible = false
+				v.PlayerGui.BanPlayers.Votekick.Visible = true
+				v.PlayerGui.BanPlayers.Votekick.NameText.Text = "Kick "..tostring(target.Name).."?"
+			end
 		end
 
 		local function fired()
 
-			local yes = game.Workspace.People.Value
+			local yes = game.Workspace.People
 
 			local count = 0
 
-			local totalneeded = 0
-
 			if target ~= nil then
-				for _,v in pairs(game.Players:GetPlayers()) do
-					count += 1
+				for i, v in pairs(game.Players:GetPlayers()) do
+					count = count + 1
 				end
-
-				if count / 2 > 1 then
-					totalneeded = (count / 2) + 0.5
-				elseif count / 2 == 1 then
-					totalneeded = count / 2
-				end
-
+				
+				local count = 30
 				while wait() do
-					wait(1)
-					local i = 30
-					yes -= 1
-					i -= 1
-					script.Parent.Parent.Votekick.Wait.Text = "Wait("..i..")" 
-
-					if yes == totalneeded then
-						target:Kick("You have been votekicked")
-						for _,v in pairs(game.Players:GetPlayers()) do
+					wait(1) 
+					if yes.Value >= (count / 2) then
+						print((player.Name).." has been kicked!")
+						kicked = true
+						for i, v in pairs(game.Players:GetPlayers()) do
+							v.PlayerGui.BanPlayers.Enabled = false
 							v.PlayerGui.BanPlayers.Votekick.Visible = false 
 						end
+						yes.Value = 0
 						break
-					else
-					    print("Not there yet")
+					elseif yes.Value < (count / 2) then
+						count -= 1
+						print("Not there yet")
+						for i, v in pairs(game.Players:GetPlayers()) do
+							v.PlayerGui.BanPlayers.Votekick.Wait.Text = count.." Seconds" 
+						end
+						if count == 0 then
+							for i, v in pairs(game.Players:GetPlayers()) do
+								v.PlayerGui.BanPlayers.Votekick.Visible = false 
+							end
+							break
+						end
 					end
+				end
+				if kicked == true then
+					target:Kick("You have been vote-kicked.")
 				end
 			else
 				return "invalid"
@@ -62,10 +71,9 @@ local function mainclass()
 
 		fired()
 	end
-
-	function serverbanned()
-
-		local target = game.Players:FindFirstChild(tostring(script.Parent.UserInput.Text))
+	
+	local function serverbanned(player, text)
+		local target = game.Players:FindFirstChild(tostring(text))
 
 		local banned = {}
 
@@ -75,14 +83,15 @@ local function mainclass()
 				table.insert(banned, {tostring(target.Name)})
 
 				game.Players.PlayerAdded:Connect(function(player)
-					for _,v in pairs(banned) do
+					for i, v in pairs(banned) do
 						if player.Name == banned[v] then
 							player:Kick("You have been server-banned")
 						elseif player.Name ~= banned[v] then
-							print("Not a banned person")			
+							return "Not a banned person"		
 						end
 					end
-				end) 
+				end)
+
 
 			else
 				script.Parent.UserInput.Text = "Cannot ban yourself"
@@ -101,10 +110,10 @@ local function mainclass()
 
 		print("pro")
 	end
-
-	script.Parent.VoteKick.MouseButton1Down:Connect(votekick)
-	script.Parent.Kick.MouseButton1Down:Connect(kick)
-	script.Parent.ServerBan.MouseButton1Down:Connect(serverbanned)
+	
+	script.Parent.KickEvent.OnServerEvent:Connect(kick)
+	script.Parent.VoteKickEvent.OnServerEvent:Connect(votekick)
+	script.Parent.ServerBannedEvent.OnServerEvent:Connect(serverbanned)
 end
 
 mainclass()
